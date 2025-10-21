@@ -1,0 +1,104 @@
+<section class="product-block" group="Products">
+    <mbr-parameters>
+        <!-- Simple block parameters -->
+        <header>Layout</header>
+        <input type="range" inline title="Products per Row" name="columns" min="1" max="4" step="1" value="3" description="Products per row (1-4)">
+        <input type="checkbox" title="Show Product Names" name="showNames" checked>
+        <input type="checkbox" title="Show Descriptions" name="showDescriptions">
+        <input type="checkbox" title="Show Quantity Selector" name="showQuantity" checked>
+
+        <header>Styling</header>
+        <input type="color" title="Card Background" name="cardBg" value="#ffffff">
+        <input type="color" title="Text Color" name="textColor" value="#000000">
+        <input type="color" title="Price Color" name="priceColor" value="#007bff">
+        <input type="color" title="Button Color" name="buttonColor" value="#007bff">
+        <input type="color" title="Button Text Color" name="buttonTextColor" value="#ffffff">
+        <input type="range" inline title="Border Radius" name="borderRadius" min="0" max="15" step="1" value="8">
+
+        <header>Settings</header>
+        <input type="text" title="Button Text" name="buttonText" value="Add to Cart">
+        <!-- End block parameters -->
+    </mbr-parameters>
+
+    <div class="container" style="padding: 40px 0;">
+        <div class="row">
+            <!-- Product 1 -->
+            <div class="col-12 col-md-{{12/columns}} mb-4">
+                <div class="card product-item h-100" mbr-style="{'background-color': cardBg, 'color': textColor, 'border-radius': borderRadius + 'px'}" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <img src="../_images/product1.jpg" class="card-img-top" alt="Product 1" mbr-style="{'border-radius': borderRadius + 'px ' + borderRadius + 'px 0 0', 'height': '200px', 'object-fit': 'cover'}">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" mbr-if="showNames" mbr-editable="productName1">Product Name 1</h5>
+                        <p class="card-text" mbr-style="{'color': priceColor, 'font-weight': 'bold', 'font-size': '1.2em'}">$<span mbr-editable="productPrice1">19.99</span></p>
+                        <p class="card-text flex-grow-1" mbr-if="showDescriptions" mbr-editable="productDescription1">Great product description</p>
+                        <div mbr-if="showQuantity" class="product-controls mt-auto">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Qty</span>
+                                </div>
+                                <input type="number" class="form-control product-quantity" value="1" min="1" max="99">
+                            </div>
+                            <button class="btn add-to-cart-btn" mbr-style="{'background-color': buttonColor, 'color': buttonTextColor, 'border': 'none', 'border-radius': borderRadius + 'px', 'width': '100%'}"
+                                    data-product-id="prod001"
+                                    data-product-name="Product Name 1"
+                                    data-product-price="19.99">
+                                {{buttonText}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div class="col-12 col-md-{{12/columns}} mb-4">
+                <div class="card product-item h-100" mbr-style="{'background-color': cardBg, 'color': textColor, 'border-radius': borderRadius + 'px'}" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <img src="../_images/product2.jpg" class="card-img-top" alt="Product 2" mbr-style="{'border-radius': borderRadius + 'px ' + borderRadius + 'px 0 0', 'height': '200px', 'object-fit': 'cover'}">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" mbr-if="showNames" mbr-editable="productName2">Product Name 2</h5>
+                        <p class="card-text" mbr-style="{'color': priceColor, 'font-weight': 'bold', 'font-size': '1.2em'}">$<span mbr-editable="productPrice2">29.99</span></p>
+                        <p class="card-text flex-grow-1" mbr-if="showDescriptions" mbr-editable="productDescription2">Another great product</p>
+                        <div mbr-if="showQuantity" class="product-controls mt-auto">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Qty</span>
+                                </div>
+                                <input type="number" class="form-control product-quantity" value="1" min="1" max="99">
+                            </div>
+                            <button class="btn add-to-cart-btn" mbr-style="{'background-color': buttonColor, 'color': buttonTextColor, 'border': 'none', 'border-radius': borderRadius + 'px', 'width': '100%'}"
+                                    data-product-id="prod002"
+                                    data-product-name="Product Name 2"
+                                    data-product-price="29.99">
+                                {{buttonText}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div class="col-12 col-md-{{12/columns}} mb-4">
+                <div class="card product-item h-100" mbr-style="{'background-color': cardBg, 'color': textColor, 'border-radius': borderRadius + 'px'}" style="transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <img src="../_images/product3.jpg" class="card-img-top" alt="Product 3" mbr-style="{'border-radius': borderRadius + 'px ' + borderRadius + 'px 0 0', 'height': '200px', 'object-fit': 'cover'}">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title" mbr-if="showNames" mbr-editable="productName3">Product Name 3</h5>
+                        <p class="card-text" mbr-style="{'color': priceColor, 'font-weight': 'bold', 'font-size': '1.2em'}">$<span mbr-editable="productPrice3">39.99</span></p>
+                        <p class="card-text flex-grow-1" mbr-if="showDescriptions" mbr-editable="productDescription3">Amazing product</p>
+                        <div mbr-if="showQuantity" class="product-controls mt-auto">
+                            <div class="input-group mb-2">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Qty</span>
+                                </div>
+                                <input type="number" class="form-control product-quantity" value="1" min="1" max="99">
+                            </div>
+                            <button class="btn add-to-cart-btn" mbr-style="{'background-color': buttonColor, 'color': buttonTextColor, 'border': 'none', 'border-radius': borderRadius + 'px', 'width': '100%'}"
+                                    data-product-id="prod003"
+                                    data-product-name="Product Name 3"
+                                    data-product-price="39.99">
+                                {{buttonText}}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

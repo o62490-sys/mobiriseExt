@@ -1,0 +1,15 @@
+{
+    "name": "Checkout Block",
+    "alias": "witsec-checkout-block",
+    "type": "block",
+    "version": 1.0,
+    "minAppVersion": "4.7.7",
+    "category": "witsec",
+    "description": "Shopping cart checkout with PayPal integration",
+    "thumbnail": "thumb.jpg",
+    "preview": "template.html",
+    "dependencies": [
+        "../../static/cart.js",
+        "../../css/style.css"
+    ]
+}

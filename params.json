@@ -1,0 +1,46 @@
+{
+    "name": "Shopping Cart",
+    "alias": "witsec-shopping-cart",
+    "version": 1.0,
+    "minAppVersion": "4.7.7",
+    "appScript": true,
+    "components" : [
+        {
+            "path":"components/product-block",
+            "_group":"witsec",
+            "_isSecondary": true
+        },
+        {
+            "path":"components/checkout-block",
+            "_group":"witsec",
+            "_isSecondary": true
+        }
+    ],
+    "dependencies": [
+        "static/cart.js",
+        "css/style.css"
+    ],
+    "settings": {
+        "witsec-cart-paypal-client-id": {
+            "type": "text",
+            "title": "PayPal Client ID",
+            "description": "Your PayPal Client ID for payments",
+            "default": "YOUR_PAYPAL_CLIENT_ID"
+        },
+        "witsec-cart-currency": {
+            "type": "select",
+            "title": "Currency",
+            "options": {
+                "USD": "USD ($)",
+                "EUR": "EUR (€)",
+                "GBP": "GBP (£)",
+                "CAD": "CAD (C$)",
+                "AUD": "AUD (A$)"
+            },
+            "default": "USD"
+        }
+    },
+    "description":"Add a shopping cart to your Mobirise website with PayPal integration.",
+    "largeCover": "cover.jpg",
+    "logo" : "thumbnail.jpg"
+}

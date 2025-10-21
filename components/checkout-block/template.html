@@ -1,0 +1,156 @@
+<section class="checkout-block" group="Forms"
+         data-paypal-client-id="{{paypalClientId}}"
+         data-currency="{{currency}}"
+         data-paypal-sandbox="{{paypalSandbox}}"
+         data-order-email="{{orderEmail}}"
+         data-success-url="{{successUrl}}"
+         data-cancel-url="{{cancelUrl}}">
+    <mbr-parameters>
+        <!-- Block parameters controls (Blue "Gear" panel) -->
+        <header>Payment Settings</header>
+        <input type="text" title="PayPal Client ID" name="paypalClientId" value="YOUR_PAYPAL_CLIENT_ID" required>
+        <input type="select" title="Currency" name="currency">
+            <option value="USD" selected>USD ($)</option>
+            <option value="EUR">EUR (€)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="CAD">CAD (C$)</option>
+            <option value="AUD">AUD (A$)</option>
+            <option value="BRL">BRL (R$)</option>
+            <option value="MXN">MXN ($)</option>
+        </input>
+        <input type="email" title="Email for Orders" name="orderEmail" value="your_email@example.com" required>
+        <input type="checkbox" title="Enable PayPal Sandbox" name="paypalSandbox" description="Use PayPal sandbox for testing">
+        <input type="text" title="Success URL" name="successUrl" value="" placeholder="https://yourwebsite.com/thank-you">
+        <input type="text" title="Cancel URL" name="cancelUrl" value="" placeholder="https://yourwebsite.com/checkout">
+
+        <header>Checkout Details</header>
+        <input type="checkbox" title="Require Phone Number" name="requirePhone">
+        <input type="checkbox" title="Require Company Name" name="requireCompany">
+        <input type="checkbox" title="Show Order Notes" name="showOrderNotes">
+        <input type="checkbox" title="Require Terms Acceptance" name="requireTerms">
+        <input type="textarea" title="Terms and Conditions Text" name="termsText" value="I accept the terms and conditions" condition="requireTerms">
+        <input type="checkbox" title="Show Newsletter Signup" name="showNewsletter">
+        <input type="checkbox" title="Show Gift Message" name="showGiftMessage">
+        <input type="checkbox" title="Show Coupon Code" name="showCoupon">
+
+        <header>Layout</header>
+        <input type="checkbox" title="Show Cart Summary" name="showCartSummary" checked>
+        <input type="checkbox" title="Show Customer Info Form" name="showCustomerForm" checked>
+        <input type="checkbox" title="Require Shipping Address" name="requireShipping">
+        <input type="text" title="Custom CSS Class" name="customClass" placeholder="my-checkout">
+
+        <header>Styling</header>
+        <input type="color" title="Background Color" name="bgColor" value="#f8f9fa">
+        <input type="color" title="Card Background" name="cardBgColor" value="#ffffff">
+        <input type="color" title="Primary Color" name="primaryColor" value="#007bff">
+        <input type="color" title="Text Color" name="textColor" value="#212529">
+        <input type="range" inline title="Border Radius" name="borderRadius" min="0" max="20" step="1" value="8" description="Border radius in pixels">
+
+        <header>Proceed Button Settings</header>
+        <input type="text" title="Button Text" name="proceedButtonText" value="Proceed to Payment">
+        <input type="color" title="Button Background" name="proceedButtonBgColor" value="#007bff">
+        <input type="color" title="Button Text Color" name="proceedButtonTextColor" value="#ffffff">
+        <input type="range" inline title="Button Border Radius" name="proceedButtonBorderRadius" min="0" max="20" step="1" value="8">
+        <input type="select" title="Button Size" name="proceedButtonSize">
+            <option value="btn-lg" selected>Large</option>
+            <option value="btn-sm">Small</option>
+            <option value="">Normal</option>
+        </input>
+        <!-- End block parameters -->
+    </mbr-parameters>
+
+    <div class="container {{customClass}}" mbr-style="{'background-color': bgColor, 'padding': '40px 0'}">
+        <h2 class="mbr-section-title mbr-fonts-style display-2" mbr-style="{'color': textColor}"><strong>Checkout</strong></h2>
+        <div class="row">
+            <div class="col-md-6" mbr-if="showCustomerForm">
+                <div class="card" mbr-style="{'background-color': cardBgColor, 'border-radius': borderRadius + 'px', 'padding': '20px'}">
+                    <h3 class="mbr-fonts-style display-5" mbr-style="{'color': textColor}">Your Information</h3>
+                    <form id="checkout-form">
+                        <div class="form-group">
+                            <label for="name" mbr-style="{'color': textColor}">Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" required mbr-style="{'border-radius': borderRadius + 'px'}">
+                        </div>
+                        <div class="form-group">
+                            <label for="email" mbr-style="{'color': textColor}">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required mbr-style="{'border-radius': borderRadius + 'px'}">
+                        </div>
+
+                        <div mbr-if="requirePhone" class="form-group">
+                            <label for="phone" mbr-style="{'color': textColor}">Phone Number *</label>
+                            <input type="tel" class="form-control" id="phone" name="phone" required mbr-style="{'border-radius': borderRadius + 'px'}">
+                        </div>
+
+                        <div mbr-if="requireCompany" class="form-group">
+                            <label for="company" mbr-style="{'color': textColor}">Company Name</label>
+                            <input type="text" class="form-control" id="company" name="company" mbr-style="{'border-radius': borderRadius + 'px'}">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address" mbr-style="{'color': textColor}">Address *</label>
+                            <input type="text" class="form-control" id="address" name="address" required mbr-style="{'border-radius': borderRadius + 'px'}">
+                        </div>
+                        <div class="form-group">
+                            <label for="city" mbr-style="{'color': textColor}">City *</label>
+                            <input type="text" class="form-control" id="city" name="city" required mbr-style="{'border-radius': borderRadius + 'px'}">
+                        </div>
+                        <div class="form-group">
+                            <label for="zip" mbr-style="{'color': textColor}">Zip Code *</label>
+                            <input type="text" class="form-control" id="zip" name="zip" required mbr-style="{'border-radius': borderRadius + 'px'}">
+                        </div>
+
+                        <div mbr-if="requireShipping" class="form-group">
+                            <label for="shipping-address" mbr-style="{'color': textColor}">Shipping Address</label>
+                            <textarea class="form-control" id="shipping-address" name="shipping-address" rows="3" mbr-style="{'border-radius': borderRadius + 'px'}"></textarea>
+                        </div>
+
+                        <div mbr-if="showOrderNotes" class="form-group">
+                            <label for="order-notes" mbr-style="{'color': textColor}">Order Notes</label>
+                            <textarea class="form-control" id="order-notes" name="order-notes" rows="3" placeholder="Special instructions..." mbr-style="{'border-radius': borderRadius + 'px'}"></textarea>
+                        </div>
+
+                        <div mbr-if="showCoupon" class="form-group">
+                            <label for="coupon" mbr-style="{'color': textColor}">Coupon Code</label>
+                            <input type="text" class="form-control" id="coupon" name="coupon" placeholder="Enter coupon code" mbr-style="{'border-radius': borderRadius + 'px'}">
+                        </div>
+
+                        <div mbr-if="showNewsletter" class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="newsletter">
+                                <label class="form-check-label" for="newsletter" mbr-style="{'color': textColor}">
+                                    Subscribe to our newsletter for updates and special offers
+                                </label>
+                            </div>
+                        </div>
+
+                        <div mbr-if="showGiftMessage" class="form-group">
+                            <label for="gift-message" mbr-style="{'color': textColor}">Gift Message</label>
+                            <textarea class="form-control" id="gift-message" rows="2" placeholder="Enter gift message..." mbr-style="{'border-radius': borderRadius + 'px'}"></textarea>
+                        </div>
+
+                        <div mbr-if="requireTerms" class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="terms" required>
+                                <label class="form-check-label" for="terms" mbr-style="{'color': textColor}">
+                                    I accept the terms and conditions
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="button" id="proceed-to-payment" class="btn btn-primary {{proceedButtonSize}} btn-block"
+                                mbr-style="{'background-color': proceedButtonBgColor, 'color': proceedButtonTextColor, 'border-radius': proceedButtonBorderRadius + 'px', 'border': 'none'}">
+                            {{proceedButtonText}}
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="col-md-6" mbr-if="showCartSummary">
+                <div class="card" mbr-style="{'background-color': cardBgColor, 'border-radius': borderRadius + 'px', 'padding': '20px'}">
+                    <h3 class="mbr-fonts-style display-5" mbr-style="{'color': textColor}">Order Summary</h3>
+                    <div id="cart-summary"></div>
+                    <h4 class="mbr-fonts-style display-6 mt-4" mbr-style="{'color': textColor}">Total: <span id="cart-total">$0.00</span></h4>
+                    <div id="paypal-button-container" class="mt-4"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
