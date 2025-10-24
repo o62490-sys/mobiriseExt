@@ -1,0 +1,156 @@
+<section class="product-block" group="Products" data-button-text="Add to Cart" data-card-bg="#ffffff">
+    <mbr-parameters>
+        <header>Product 1</header>
+        <input type="text" title="Product ID" name="prod1Id" value="prod-001">
+        <input type="text" title="Name" name="prod1Name" value="Product 1">
+        <input type="text" title="Price" name="prod1Price" value="19.99">
+        <input type="text" title="Description" name="prod1Desc" value="Description">
+
+        <header>Product 2</header>
+        <input type="text" title="Product ID" name="prod2Id" value="prod-002">
+        <input type="text" title="Name" name="prod2Name" value="Product 2">
+        <input type="text" title="Price" name="prod2Price" value="29.99">
+        <input type="text" title="Description" name="prod2Desc" value="Description">
+
+        <header>Product 3</header>
+        <input type="text" title="Product ID" name="prod3Id" value="prod-003">
+        <input type="text" title="Name" name="prod3Name" value="Product 3">
+        <input type="text" title="Price" name="prod3Price" value="39.99">
+        <input type="text" title="Description" name="prod3Desc" value="Description">
+
+        <header>Button Settings</header>
+        <input type="text" title="Button Text" name="buttonText" value="Add to Cart">
+        <input type="color" title="Button Color" name="buttonColor" value="#007bff">
+        <input type="color" title="Button Text Color" name="buttonTextColor" value="#ffffff">
+
+        <header>Card Settings</header>
+        <input type="color" title="Card Background" name="cardBg" value="#ffffff">
+        <input type="color" title="Text Color" name="textColor" value="#000000">
+        <input type="color" title="Price Color" name="priceColor" value="#007bff">
+        <input type="range" inline title="Border Radius" name="borderRadius" min="0" max="15" step="1" value="8">
+
+        <header>Layout</header>
+        <input type="checkbox" title="Show Names" name="showNames" checked>
+        <input type="checkbox" title="Show Descriptions" name="showDescriptions">
+        <input type="checkbox" title="Show Quantity" name="showQuantity" checked>
+    </mbr-parameters>
+
+    <div class="container" style="padding: 40px 0;">
+        <div class="row">
+            <!-- PRODUCT 1 -->
+            <div class="col-12 col-md-4 mb-4">
+                <div class="card product-item" mbr-style="{'background-color': cardBg, 'border-radius': borderRadius + 'px', 'border': 'none'}">
+                    <img src="assets/images/product1.jpg" class="card-img-top" alt="Product 1" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title" mbr-if="showNames" mbr-editable="prod1Name">{prod1Name}</h5>
+                        <p class="card-text" mbr-style="{'color': priceColor, 'font-weight': 'bold', 'font-size': '18px'}">$19.99</p>
+                        <p class="card-text" mbr-if="showDescriptions" mbr-style="{'color': textColor}">Description</p>
+                        <div mbr-if="showQuantity" style="margin-bottom: 12px;">
+                            <input type="number" class="form-control product-qty" value="1" min="1" max="99" style="width: 60px;">
+                        </div>
+                        <button class="btn add-to-cart-btn w-100"
+                                mbr-style="{'background-color': buttonColor, 'color': buttonTextColor, 'border': 'none', 'border-radius': borderRadius + 'px', 'padding': '10px'}"
+                                onclick="addProductToCart(this)"
+                                data-id="{prod1Id}"
+                                data-name="{prod1Name}"
+                                data-price="{prod1Price}">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCT 2 -->
+            <div class="col-12 col-md-4 mb-4">
+                <div class="card product-item" mbr-style="{'background-color': cardBg, 'border-radius': borderRadius + 'px', 'border': 'none'}">
+                    <img src="assets/images/product2.jpg" class="card-img-top" alt="Product 2" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title" mbr-if="showNames" mbr-editable="prod2Name">{prod2Name}</h5>
+                        <p class="card-text" mbr-style="{'color': priceColor, 'font-weight': 'bold', 'font-size': '18px'}">$29.99</p>
+                        <p class="card-text" mbr-if="showDescriptions" mbr-style="{'color': textColor}">Description</p>
+                        <div mbr-if="showQuantity" style="margin-bottom: 12px;">
+                            <input type="number" class="form-control product-qty" value="1" min="1" max="99" style="width: 60px;">
+                        </div>
+                        <button class="btn add-to-cart-btn w-100"
+                                mbr-style="{'background-color': buttonColor, 'color': buttonTextColor, 'border': 'none', 'border-radius': borderRadius + 'px', 'padding': '10px'}"
+                                onclick="addProductToCart(this)"
+                                data-id="{prod2Id}"
+                                data-name="{prod2Name}"
+                                data-price="{prod2Price}">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCT 3 -->
+            <div class="col-12 col-md-4 mb-4">
+                <div class="card product-item" mbr-style="{'background-color': cardBg, 'border-radius': borderRadius + 'px', 'border': 'none'}">
+                    <img src="assets/images/product3.jpg" class="card-img-top" alt="Product 3" style="height: 200px; object-fit: cover;">
+                    <div class="card-body">
+                        <h5 class="card-title" mbr-if="showNames" mbr-editable="prod3Name">{prod3Name}</h5>
+                        <p class="card-text" mbr-style="{'color': priceColor, 'font-weight': 'bold', 'font-size': '18px'}">$39.99</p>
+                        <p class="card-text" mbr-if="showDescriptions" mbr-style="{'color': textColor}">Description</p>
+                        <div mbr-if="showQuantity" style="margin-bottom: 12px;">
+                            <input type="number" class="form-control product-qty" value="1" min="1" max="99" style="width: 60px;">
+                        </div>
+                        <button class="btn add-to-cart-btn w-100"
+                                mbr-style="{'background-color': buttonColor, 'color': buttonTextColor, 'border': 'none', 'border-radius': borderRadius + 'px', 'padding': '10px'}"
+                                onclick="addProductToCart(this)"
+                                data-id="{prod3ID}"
+                                data-name="{prod3Name}"
+                                data-price="{prod3Price}">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // Cart management
+    let witsecCart = JSON.parse(localStorage.getItem('witsecShoppingCart')) || [];
+
+    function saveCart() {
+        localStorage.setItem('witsecShoppingCart', JSON.stringify(witsecCart));
+    }
+
+    window.addToCart = function(product) {
+        if (!product.id || !product.name || !product.price) {
+            console.error('Invalid product:', product);
+            return;
+        }
+
+        const qty = Math.max(1, parseInt(product.quantity) || 1);
+        const existing = witsecCart.findIndex(item => item.id === product.id);
+
+        if (existing > -1) {
+            witsecCart[existing].quantity += qty;
+        } else {
+            witsecCart.push({
+                id: product.id,
+                name: product.name,
+                price: parseFloat(product.price),
+                quantity: qty
+            });
+        }
+        saveCart();
+        console.log('Item added to cart:', product);
+        alert('Added to cart!');
+    };
+
+    function addProductToCart(btn) {
+        console.log('addProductToCart called with button:', btn);
+        const qty = btn.closest('.card-body').querySelector('.product-qty');
+        const quantity = qty ? parseInt(qty.value) : 1;
+
+        window.addToCart({
+            id: btn.dataset.id,
+            name: btn.dataset.name,
+            price: btn.dataset.price,
+            quantity: quantity
+        });
+    }
+</script>
+</section>

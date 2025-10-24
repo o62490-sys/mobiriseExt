@@ -1,159 +1,525 @@
 <section class="checkout-block" group="Forms">
+    <script>
+        // Global cart object - shared between all components
+        window.witsecCart = {
+            items: [],
+
+            addItem: function (productId, productName, productPrice, quantity) {
+                const qty = Math.max(1, parseInt(quantity) || 1);
+                const price = parseFloat(productPrice) || 0;
+
+                if (!productId || !productName || isNaN(price)) {
+                    console.error('Invalid product data:', { productId, productName, productPrice });
+                    return;
+                }
+
+                const existing = this.items.findIndex(
+                    (item) => item.id === productId,
+                );
+
+                if (existing > -1) {
+                    this.items[existing].quantity += qty;
+                } else {
+                    this.items.push({
+                        id: productId,
+                        name: productName,
+                        price: price,
+                        quantity: qty,
+                    });
+                }
+
+                this.saveCart();
+                this.updateCheckoutDisplay();
+                console.log("Item added:", productName);
+            },
+
+            removeItem: function (productId) {
+                this.items = this.items.filter((item) => item.id !== productId);
+                this.saveCart();
+                this.updateCheckoutDisplay();
+            },
+
+            getTotal: function () {
+                return this.items.reduce(
+                    (total, item) => {
+                        if (!item || typeof item.price !== 'number' || typeof item.quantity !== 'number') {
+                            console.error('Invalid item in total calculation:', item);
+                            return total;
+                        }
+                        return total + (item.price * item.quantity);
+                    },
+                    0,
+                );
+            },
+
+            saveCart: function () {
+                localStorage.setItem(
+                    "witsecShoppingCart",
+                    JSON.stringify(this.items),
+                );
+            },
+
+            loadCart: function () {
+                const saved = localStorage.getItem("witsecShoppingCart");
+                if (saved) {
+                    try {
+                        const parsedItems = JSON.parse(saved);
+                        if (Array.isArray(parsedItems)) {
+                            // Filter out invalid items
+                            this.items = parsedItems.filter(item =>
+                                item && typeof item.price === 'number' && typeof item.quantity === 'number' && item.name
+                            );
+                        }
+                    } catch (error) {
+                        console.error('Error loading cart from localStorage:', error);
+                        // Clear corrupted cart data
+                        localStorage.removeItem('witsecShoppingCart');
+                        this.items = [];
+                    }
+                }
+            },
+
+            updateCheckoutDisplay: function () {
+                const cartSummary = document.getElementById("cart-summary");
+                const cartTotal = document.getElementById("cart-total");
+
+                if (!cartSummary || !cartTotal) return;
+
+                cartSummary.innerHTML = "";
+                let total = 0;
+
+                if (this.items.length === 0) {
+                    cartSummary.innerHTML =
+                        '<div style="color: #999; text-align: center; padding: 20px;">Your cart is empty</div>';
+                    cartTotal.textContent = "€0.00";
+                    return;
+                }
+
+                this.items.forEach((item) => {
+                    // Validate item data
+                    if (!item || typeof item.price !== 'number' || typeof item.quantity !== 'number' || !item.name) {
+                        console.error('Invalid item in cart:', item);
+                        return;
+                    }
+
+                    const price = parseFloat(item.price) || 0;
+                    const quantity = parseInt(item.quantity) || 1;
+                    const itemTotal = price * quantity;
+                    total += itemTotal;
+
+                    const itemDiv = document.createElement("div");
+                    itemDiv.style.cssText =
+                        "display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #eee; align-items: center;";
+                    itemDiv.innerHTML = `
+                        <div>
+                            <div style="font-weight: bold; color: #14142b;">${item.name}</div>
+                            <div style="color: #999; font-size: 12px;">€${price.toFixed(2)} × ${quantity}</div>
+                        </div>
+                        <div style="display: flex; gap: 10px; align-items: center;">
+                            <div style="font-weight: bold; color: #14142b;">€${itemTotal.toFixed(2)}</div>
+                            <button onclick="window.witsecCart.removeItem('${item.id}')"
+                                    style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 6px 10px; cursor: pointer; font-size: 13px; font-weight: 600;">
+                                ×
+                            </button>
+                        </div>
+                    `;
+                    cartSummary.appendChild(itemDiv);
+                });
+
+                cartTotal.textContent = `€${total.toFixed(2)}`;
+            },
+
+            clearCart: function () {
+                this.items = [];
+                this.saveCart();
+                this.updateCheckoutDisplay();
+            },
+        };
+
+        // Initialize cart on page load
+        document.addEventListener("DOMContentLoaded", function () {
+            window.witsecCart.loadCart();
+            window.witsecCart.updateCheckoutDisplay();
+
+            // Also trigger cart update for any product blocks on the same page
+            const productBlocks = document.querySelectorAll('.pricing02');
+            if (productBlocks.length > 0) {
+                window.witsecCart.updateCheckoutDisplay();
+            }
+        });
+    </script>
+
     <mbr-parameters>
         <header>PayPal Settings</header>
-        <input type="text" title="PayPal Client ID" name="paypalClientId" value="YOUR_PAYPAL_CLIENT_ID">
-        <input type="select" title="Currency" name="currency">
-            <option value="USD" selected>USD ($)</option>
-            <option value="EUR">EUR (€)</option>
-            <option value="GBP">GBP (£)</option>
-            <option value="CAD">CAD (C$)</option>
-            <option value="AUD">AUD (A$)</option>
-        </input>
-        <input type="text" title="Order Email" name="orderEmail" value="your_email@example.com">
+        <input
+            type="text"
+            title="PayPal Email (Receiver)"
+            name="paypalEmail"
+            value="your_email@paypal.com"
+        />
+        <input type="text" title="Currency Code" name="currency" value="EUR" />
 
-        <header>Button Settings</header>
-        <input type="text" title="Button Text" name="proceedButtonText" value="Proceed to Payment">
-        <input type="color" title="Button Color" name="proceedButtonBgColor" value="#007bff">
-        <input type="color" title="Button Text Color" name="proceedButtonTextColor" value="#ffffff">
-
-        <header>Form Settings</header>
-        <input type="checkbox" title="Show Cart Summary" name="showCartSummary" checked>
-        <input type="checkbox" title="Show Customer Form" name="showCustomerForm" checked>
-        <input type="checkbox" title="Require Terms" name="requireTerms">
+        <header>Show/Hide</header>
+        <input type="checkbox" name="showTitle" title="Title" checked />
+        <input type="checkbox" name="showForm" title="Customer Form" checked />
+        <input
+            type="checkbox"
+            name="showSummary"
+            title="Order Summary"
+            checked
+        />
 
         <header>Colors</header>
-        <input type="color" title="Background Color" name="bgColor" value="#f8f9fa">
-        <input type="color" title="Card Background" name="cardBgColor" value="#ffffff">
-        <input type="color" title="Text Color" name="textColor" value="#212529">
+        <input
+            type="color"
+            title="Background Color"
+            name="bgColor"
+            value="#f8f9fa"
+        />
+        <input
+            type="color"
+            title="Card Background"
+            name="cardBg"
+            value="#ffffff"
+        />
+        <input
+            type="color"
+            title="Button Color"
+            name="buttonColor"
+            value="#007bff"
+        />
+        <input
+            type="color"
+            title="Text Color"
+            name="textColor"
+            value="#14142b"
+        />
     </mbr-parameters>
 
-    <div class="container" mbr-style="{'background-color': bgColor, 'padding': '40px 0'}">
-        <h2 class="mbr-section-title mbr-fonts-style display-2" mbr-style="{'color': textColor}">
-            <strong>Checkout</strong>
-        </h2>
-        
-        <div class="row">
-            <!-- Customer Info Form -->
-            <div class="col-md-6" mbr-if="showCustomerForm">
-                <div class="card" mbr-style="{'background-color': cardBgColor, 'padding': '20px'}">
-                    <h3 class="mbr-fonts-style display-5" mbr-style="{'color': textColor}">Your Information</h3>
-                    
-                    <form id="checkout-form">
-                        <div class="form-group">
-                            <label for="name" mbr-style="{'color': textColor}">Name *</label>
-                            <input type="text" class="form-control" id="name" name="name" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="email" mbr-style="{'color': textColor}">Email *</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="address" mbr-style="{'color': textColor}">Address *</label>
-                            <input type="text" class="form-control" id="address" name="address" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="city" mbr-style="{'color': textColor}">City *</label>
-                            <input type="text" class="form-control" id="city" name="city" required>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label for="zip" mbr-style="{'color': textColor}">Zip Code *</label>
-                            <input type="text" class="form-control" id="zip" name="zip" required>
-                        </div>
-
-                        <div mbr-if="requireTerms" class="form-group">
-                            <div class="form-check">
-                                <input type="checkbox" class="form-check-input" id="terms" required>
-                                <label class="form-check-label" for="terms" mbr-style="{'color': textColor}">
-                                    I accept the terms and conditions
-                                </label>
-                            </div>
-                        </div>
-
-                        <button type="button" id="proceed-to-payment" class="btn btn-block"
-                                mbr-style="{'background-color': proceedButtonBgColor, 'color': proceedButtonTextColor, 'border': 'none', 'padding': '12px', 'border-radius': '6px', 'font-weight': '500', 'width': '100%'}">
-                            Proceed to Payment
-                        </button>
-                    </form>
+    <div
+        class="container-fluid"
+        mbr-style="{'background-color': bgColor, 'padding': '40px 0'}"
+        style="width: 100%; margin: 0; padding: 40px 0"
+    >
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 content-head">
+                    <div class="mbr-section-head mb-5" mbr-if="showTitle">
+                        <h2
+                            class="mbr-section-title mbr-fonts-style align-center"
+                            mbr-theme-style="display-2"
+                            style="font-weight: bold; margin-bottom: 40px"
+                            mbr-style="{'color': textColor}"
+                        >
+                            <b>Checkout</b>
+                        </h2>
+                    </div>
                 </div>
             </div>
 
-            <!-- Order Summary -->
-            <div class="col-md-6" mbr-if="showCartSummary">
-                <div class="card" mbr-style="{'background-color': cardBgColor, 'padding': '20px'}">
-                    <h3 class="mbr-fonts-style display-5" mbr-style="{'color': textColor}">Order Summary</h3>
-                    
-                    <div id="cart-summary" style="min-height: 100px; margin-bottom: 20px;">
-                        <p mbr-style="{'color': textColor}">Your cart is empty</p>
-                    </div>
-                    
-                    <h4 mbr-style="{'color': textColor}">
-                        Total: <span id="cart-total">$0.00</span>
-                    </h4>
+            <div class="row">
+                <!-- Customer Info Form -->
+                <div class="col-12 col-md-6" mbr-if="showForm">
+                    <div
+                        class="card item-wrapper"
+                        mbr-style="{'background-color': cardBg, 'border': 'none', 'border-radius': '8px', 'box-shadow': '0 2px 10px rgba(0,0,0,0.1)', 'padding': '20px'}"
+                    >
+                        <h3
+                            class="item-title"
+                            mbr-theme-style="display-5"
+                            style="font-weight: bold; margin-bottom: 20px"
+                            mbr-style="{'color': textColor}"
+                        >
+                            Your Information
+                        </h3>
 
-                    <div id="paypal-button-container" style="margin-top: 20px; min-height: 50px;"></div>
+                        <form id="checkout-form">
+                            <div class="form-group" style="margin-bottom: 15px">
+                                <label
+                                    for="name"
+                                    style="
+                                        font-weight: 600;
+                                        display: block;
+                                        margin-bottom: 8px;
+                                    "
+                                    mbr-style="{'color': textColor}"
+                                >
+                                    Name *
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="name"
+                                    name="name"
+                                    required
+                                    style="
+                                        padding: 10px;
+                                        border-radius: 6px;
+                                        border: 1px solid #ddd;
+                                        width: 100%;
+                                        box-sizing: border-box;
+                                    "
+                                />
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 15px">
+                                <label
+                                    for="email"
+                                    style="
+                                        font-weight: 600;
+                                        display: block;
+                                        margin-bottom: 8px;
+                                    "
+                                    mbr-style="{'color': textColor}"
+                                >
+                                    Email *
+                                </label>
+                                <input
+                                    type="email"
+                                    class="form-control"
+                                    id="email"
+                                    name="email"
+                                    required
+                                    style="
+                                        padding: 10px;
+                                        border-radius: 6px;
+                                        border: 1px solid #ddd;
+                                        width: 100%;
+                                        box-sizing: border-box;
+                                    "
+                                />
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 15px">
+                                <label
+                                    for="address"
+                                    style="
+                                        font-weight: 600;
+                                        display: block;
+                                        margin-bottom: 8px;
+                                    "
+                                    mbr-style="{'color': textColor}"
+                                >
+                                    Address *
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="address"
+                                    name="address"
+                                    required
+                                    style="
+                                        padding: 10px;
+                                        border-radius: 6px;
+                                        border: 1px solid #ddd;
+                                        width: 100%;
+                                        box-sizing: border-box;
+                                    "
+                                />
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 15px">
+                                <label
+                                    for="city"
+                                    style="
+                                        font-weight: 600;
+                                        display: block;
+                                        margin-bottom: 8px;
+                                    "
+                                    mbr-style="{'color': textColor}"
+                                >
+                                    City *
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="city"
+                                    name="city"
+                                    required
+                                    style="
+                                        padding: 10px;
+                                        border-radius: 6px;
+                                        border: 1px solid #ddd;
+                                        width: 100%;
+                                        box-sizing: border-box;
+                                    "
+                                />
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 20px">
+                                <label
+                                    for="zip"
+                                    style="
+                                        font-weight: 600;
+                                        display: block;
+                                        margin-bottom: 8px;
+                                    "
+                                    mbr-style="{'color': textColor}"
+                                >
+                                    Zip Code *
+                                </label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    id="zip"
+                                    name="zip"
+                                    required
+                                    style="
+                                        padding: 10px;
+                                        border-radius: 6px;
+                                        border: 1px solid #ddd;
+                                        width: 100%;
+                                        box-sizing: border-box;
+                                    "
+                                />
+                            </div>
+
+                            <a
+                                href="#"
+                                id="proceed-to-payment"
+                                class="btn item-btn btn-primary w-100"
+                                mbr-style="{'background-color': buttonColor, 'color': 'white', 'border': 'none', 'padding': '12px', 'border-radius': '6px', 'font-weight': '600', 'cursor': 'pointer', 'font-size': '16px', 'text-decoration': 'none', 'display': 'block', 'text-align': 'center'}"
+                                onclick="event.preventDefault(); handleCheckout(); return false;"
+                            >
+                                Proceed to Payment
+                            </a>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Order Summary -->
+                <div class="col-12 col-md-6" mbr-if="showSummary">
+                    <div
+                        class="card item-wrapper"
+                        mbr-style="{'background-color': cardBg, 'border': 'none', 'border-radius': '8px', 'box-shadow': '0 2px 10px rgba(0,0,0,0.1)', 'padding': '20px', 'height': '100%'}"
+                    >
+                        <h3
+                            class="item-title"
+                            mbr-theme-style="display-5"
+                            style="font-weight: bold; margin-bottom: 20px"
+                            mbr-style="{'color': textColor}"
+                        >
+                            Order Summary
+                        </h3>
+
+                        <div
+                            id="cart-summary"
+                            style="
+                                max-height: 350px;
+                                overflow-y: auto;
+                                margin-bottom: 20px;
+                                padding: 15px;
+                                background: #f9f9f9;
+                                border-radius: 6px;
+                            "
+                        >
+                            <div
+                                style="
+                                    color: #999;
+                                    text-align: center;
+                                    padding: 20px;
+                                "
+                            >
+                                Your cart is empty
+                            </div>
+                        </div>
+
+                        <div
+                            style="
+                                border-top: 2px solid #eee;
+                                padding-top: 15px;
+                                margin-bottom: 20px;
+                            "
+                        >
+                            <h4
+                                class="item-subtitle"
+                                mbr-theme-style="display-7"
+                                style="
+                                    text-align: right;
+                                    font-weight: bold;
+                                    margin: 0;
+                                "
+                                mbr-style="{'color': textColor}"
+                            >
+                                Total:
+                                <span
+                                    id="cart-total"
+                                    style="color: #007bff; font-size: 1.5rem"
+                                    >€0.00</span
+                                >
+                            </h4>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
     <script>
-        function displayCartItems() {
-            const cart = JSON.parse(localStorage.getItem('witsecShoppingCart')) || [];
-            const cartSummary = document.getElementById('cart-summary');
-            const cartTotal = document.getElementById('cart-total');
-            if (cart.length === 0) {
-                cartSummary.innerHTML = '<p>Your cart is empty</p>';
-                cartTotal.textContent = '\u00240.00'; // $0.00
+        function handleCheckout() {
+            const form = document.getElementById("checkout-form");
+            const requiredFields = form.querySelectorAll("[required]");
+            let isValid = true;
+
+            // Validate form
+            requiredFields.forEach((field) => {
+                if (!field.value.trim()) {
+                    field.style.borderColor = "#dc3545";
+                    isValid = false;
+                } else {
+                    field.style.borderColor = "";
+                }
+            });
+
+            // Check if cart has items
+            if (window.witsecCart.items.length === 0) {
+                alert("Your cart is empty!");
                 return;
             }
-            let html = '';
-            let total = 0;
-            cart.forEach(item => {
-                const price = parseFloat(item.price) || 0;
-                const itemTotal = price * item.quantity;
-                total += itemTotal;
-                html += '<div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee;">' +
-                            '<div>' +
-                                '<strong>' + item.name + '</strong><br>' +
-                                '\u0024' + price.toFixed(2) + ' × ' + item.quantity +
-                            '</div>' +
-                            '<div>\u0024' + itemTotal.toFixed(2) + '</div>' +
-                        '</div>';
-            });
-            cartSummary.innerHTML = html;
-            cartTotal.textContent = '\u0024' + total.toFixed(2);
-        }
-        document.addEventListener('DOMContentLoaded', displayCartItems);
-    </script>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const proceedBtn = document.getElementById('proceed-to-payment');
-            if (proceedBtn) {
-                proceedBtn.addEventListener('click', function() {
-                    const form = document.getElementById('checkout-form');
-                    const requiredFields = form.querySelectorAll('[required]');
-                    let isValid = true;
+            if (isValid) {
+                // Generate PayPal checkout URL
+                const paypalEmail = "your_email@paypal.com"; // REPLACE WITH YOUR PAYPAL EMAIL
+                const currency = "EUR";
+                let paypalUrl = `https://www.paypal.com/cgi-bin/webscr?cmd=_xclick&business=${paypalEmail}&currency_code=${currency}`;
 
-                    requiredFields.forEach(field => {
-                        if (!field.value.trim()) {
-                            field.style.borderColor = '#dc3545';
-                            isValid = false;
-                        } else {
-                            field.style.borderColor = '';
-                        }
-                    });
-
-                    if (isValid) {
-                        alert('Form valid! Ready for payment.');
-                    } else {
-                        alert('Please fill in all required fields.');
+                // Add cart items to PayPal URL
+                window.witsecCart.items.forEach((item, index) => {
+                    // Validate item data before adding to PayPal URL
+                    if (!item || typeof item.price !== 'number' || typeof item.quantity !== 'number' || !item.name) {
+                        console.error('Invalid item in PayPal checkout:', item);
+                        return;
                     }
+
+                    paypalUrl += `&item_name_${index + 1}=${encodeURIComponent(item.name)}`;
+                    paypalUrl += `&item_number_${index + 1}=${item.id}`;
+                    paypalUrl += `&quantity_${index + 1}=${item.quantity}`;
+                    paypalUrl += `&amount_${index + 1}=${item.price}`;
                 });
+
+                // Customer info
+                const email = document.getElementById("email").value;
+                const name = document.getElementById("name").value;
+                paypalUrl += `&invoice=${Date.now()}&custom=${encodeURIComponent(name)}&rm=2&return=${window.location.href}`;
+
+                console.log("PayPal URL:", paypalUrl);
+
+                // Redirect to PayPal
+                window.open(paypalUrl, "_blank");
+            } else {
+                alert("Please fill in all required fields.");
             }
+        }
+
+        // Prevent form submission on Enter
+        document.addEventListener("DOMContentLoaded", function () {
+            const form = document.getElementById("checkout-form");
+            form.addEventListener("keypress", function (e) {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleCheckout();
+                }
+            });
         });
     </script>
 </section>

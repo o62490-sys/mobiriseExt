@@ -1,155 +1,393 @@
-<section class="product-block" group="Products" data-button-text="Add to Cart" data-card-bg="#ffffff">
+<section class="pricing02" group="Pricing">
+    <script>
+        // Ensure cart object exists
+        if (!window.witsecCart) {
+            window.witsecCart = {
+                items: [],
+
+            addItem: function (productId, productName, productPrice, quantity) {
+                const qty = Math.max(1, parseInt(quantity) || 1);
+                const price = parseFloat(productPrice) || 0;
+
+                if (!productId || !productName || isNaN(price)) {
+                    console.error('Invalid product data:', { productId, productName, productPrice });
+                    return;
+                }
+
+                const existing = this.items.findIndex(
+                    (item) => item.id === productId,
+                );
+
+                if (existing > -1) {
+                    this.items[existing].quantity += qty;
+                } else {
+                    this.items.push({
+                        id: productId,
+                        name: productName,
+                        price: price,
+                        quantity: qty,
+                    });
+                }
+
+                this.saveCart();
+                this.updateCheckoutDisplay();
+                console.log("Item added:", productName);
+            },
+
+                removeItem: function (productId) {
+                    this.items = this.items.filter((item) => item.id !== productId);
+                    this.saveCart();
+                    this.updateCheckoutDisplay();
+                },
+
+                getTotal: function () {
+                    return this.items.reduce(
+                        (total, item) => {
+                            if (!item || typeof item.price !== 'number' || typeof item.quantity !== 'number') {
+                                console.error('Invalid item in total calculation:', item);
+                                return total;
+                            }
+                            return total + (item.price * item.quantity);
+                        },
+                        0,
+                    );
+                },
+
+                saveCart: function () {
+                    localStorage.setItem(
+                        "witsecShoppingCart",
+                        JSON.stringify(this.items),
+                    );
+                },
+
+                loadCart: function () {
+                    const saved = localStorage.getItem("witsecShoppingCart");
+                    if (saved) {
+                        try {
+                            const parsedItems = JSON.parse(saved);
+                            if (Array.isArray(parsedItems)) {
+                                // Filter out invalid items
+                                this.items = parsedItems.filter(item =>
+                                    item && typeof item.price === 'number' && typeof item.quantity === 'number' && item.name
+                                );
+                            }
+                        } catch (error) {
+                            console.error('Error loading cart from localStorage:', error);
+                            // Clear corrupted cart data
+                            localStorage.removeItem('witsecShoppingCart');
+                            this.items = [];
+                        }
+                    }
+                },
+
+                updateCheckoutDisplay: function () {
+                    const cartSummary = document.getElementById("cart-summary");
+                    const cartTotal = document.getElementById("cart-total");
+
+                    if (!cartSummary || !cartTotal) return;
+
+                    cartSummary.innerHTML = "";
+                    let total = 0;
+
+                    if (this.items.length === 0) {
+                        cartSummary.innerHTML =
+                            '<p style="color: #999; text-align: center;">Your cart is empty</p>';
+                        cartTotal.textContent = "€0.00";
+                        return;
+                    }
+
+                    this.items.forEach((item) => {
+                        // Validate item data
+                        if (!item || typeof item.price !== 'number' || typeof item.quantity !== 'number' || !item.name) {
+                            console.error('Invalid item in cart:', item);
+                            return;
+                        }
+
+                        const price = parseFloat(item.price) || 0;
+                        const quantity = parseInt(item.quantity) || 1;
+                        const itemTotal = price * quantity;
+                        total += itemTotal;
+
+                        const itemDiv = document.createElement("div");
+                        itemDiv.style.cssText =
+                            "display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee; align-items: center;";
+                        itemDiv.innerHTML = `
+                            <div>
+                                <strong>${item.name}</strong><br>
+                                <small>€${price.toFixed(2)} × ${quantity}</small>
+                            </div>
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <strong>€${itemTotal.toFixed(2)}</strong>
+                                <button onclick="window.witsecCart.removeItem('${item.id}')"
+                                        style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 4px 8px; cursor: pointer; font-size: 12px;">
+                                    Remove
+                                </button>
+                            </div>
+                        `;
+                        cartSummary.appendChild(itemDiv);
+                    });
+
+                    cartTotal.textContent = `€${total.toFixed(2)}`;
+                },
+
+                clearCart: function () {
+                    this.items = [];
+                    this.saveCart();
+                    this.updateCheckoutDisplay();
+                },
+            };
+        }
+
+        // Initialize cart on page load
+        document.addEventListener("DOMContentLoaded", function () {
+            window.witsecCart.loadCart();
+            window.witsecCart.updateCheckoutDisplay();
+
+            // Also trigger cart update for any checkout blocks on the same page
+            const checkoutSummary = document.getElementById("cart-summary");
+            const checkoutTotal = document.getElementById("cart-total");
+            if (checkoutSummary && checkoutTotal) {
+                window.witsecCart.updateCheckoutDisplay();
+            }
+        });
+    </script>
+
     <mbr-parameters>
+        <header>Size</header>
+        <select title="Columns" name="cardsWidth">
+            <option value="12">1</option>
+            <option value="6">2</option>
+            <option value="4">3</option>
+            <option value="3" selected>4</option>
+        </select>
+
+        <header>Show/Hide</header>
+        <input type="checkbox" name="showTitle" title="Title" checked>
+        <input type="checkbox" name="showCardTitle" title="Product Title" checked>
+        <input type="checkbox" name="showCardSubtitle" title="Price" checked>
+        <input type="checkbox" name="showText" title="Description" checked>
+        <input type="checkbox" name="showButtons" title="Buttons" checked>
+        <input type="checkbox" name="showQuantity" title="Quantity Input" checked>
+
         <header>Product 1</header>
-        <input type="text" title="Product ID" name="prod1Id" value="prod-001">
         <input type="text" title="Name" name="prod1Name" value="Product 1">
         <input type="text" title="Price" name="prod1Price" value="19.99">
-        <input type="text" title="Description" name="prod1Desc" value="Description">
+        <input type="text" title="Product ID" name="prod1Id" value="prod-001">
 
         <header>Product 2</header>
-        <input type="text" title="Product ID" name="prod2Id" value="prod-002">
         <input type="text" title="Name" name="prod2Name" value="Product 2">
         <input type="text" title="Price" name="prod2Price" value="29.99">
-        <input type="text" title="Description" name="prod2Desc" value="Description">
+        <input type="text" title="Product ID" name="prod2Id" value="prod-002">
 
         <header>Product 3</header>
-        <input type="text" title="Product ID" name="prod3Id" value="prod-003">
         <input type="text" title="Name" name="prod3Name" value="Product 3">
         <input type="text" title="Price" name="prod3Price" value="39.99">
-        <input type="text" title="Description" name="prod3Desc" value="Description">
+        <input type="text" title="Product ID" name="prod3Id" value="prod-003">
 
-        <header>Button Settings</header>
-        <input type="text" title="Button Text" name="buttonText" value="Add to Cart">
-        <input type="color" title="Button Color" name="buttonColor" value="#007bff">
-        <input type="color" title="Button Text Color" name="buttonTextColor" value="#ffffff">
+        <header>Product 4</header>
+        <input type="text" title="Name" name="prod4Name" value="Product 4">
+        <input type="text" title="Price" name="prod4Price" value="24.99">
+        <input type="text" title="Product ID" name="prod4Id" value="prod-004">
 
-        <header>Card Settings</header>
-        <input type="color" title="Card Background" name="cardBg" value="#ffffff">
-        <input type="color" title="Text Color" name="textColor" value="#000000">
-        <input type="color" title="Price Color" name="priceColor" value="#007bff">
-        <input type="range" inline title="Border Radius" name="borderRadius" min="0" max="15" step="1" value="8">
+        <header>Product 5</header>
+        <input type="text" title="Name" name="prod5Name" value="Product 5">
+        <input type="text" title="Price" name="prod5Price" value="34.99">
+        <input type="text" title="Product ID" name="prod5Id" value="prod-005">
 
-        <header>Layout</header>
-        <input type="checkbox" title="Show Names" name="showNames" checked>
-        <input type="checkbox" title="Show Descriptions" name="showDescriptions">
-        <input type="checkbox" title="Show Quantity" name="showQuantity" checked>
+        <header>Product 6</header>
+        <input type="text" title="Name" name="prod6Name" value="Product 6">
+        <input type="text" title="Price" name="prod6Price" value="29.99">
+        <input type="text" title="Product ID" name="prod6Id" value="prod-006">
+
+        <header>Colors</header>
+        <input type="color" name="cardsBg" title="Card Background" value="#ffffff">
+        <input type="color" name="bgColor" title="Background Color" value="#fafafa">
+        <input type="color" name="buttonColor" title="Button Color" value="#007bff">
     </mbr-parameters>
 
-    <div class="container" style="padding: 40px 0;">
+    <div class="container-fluid" mbr-style="{'background-color': bgColor, 'padding': '40px 0'}" style="width: 100%; margin: 0; padding: 40px 0">
+        <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 content-head">
+                <div class="mbr-section-head mb-5" mbr-if="showTitle">
+                    <h4 class="mbr-section-title" style="text-align: center; font-weight: bold; margin-bottom: 40px;">
+                        Nossos Tesouros de Tricô
+                    </h4>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
-            <!-- PRODUCT 1 -->
-            <div class="col-12 col-md-4 mb-4">
-                <div class="card product-item" mbr-style="{'background-color': cardBg, 'border-radius': borderRadius + 'px', 'border': 'none'}">
-                    <img src="assets/images/product1.jpg" class="card-img-top" alt="Product 1" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title" mbr-if="showNames" mbr-editable="prod1Name">{prod1Name}</h5>
-                        <p class="card-text" mbr-style="{'color': priceColor, 'font-weight': 'bold', 'font-size': '18px'}">$19.99</p>
-                        <p class="card-text" mbr-if="showDescriptions" mbr-style="{'color': textColor}">Description</p>
-                        <div mbr-if="showQuantity" style="margin-bottom: 12px;">
-                            <input type="number" class="form-control product-qty" value="1" min="1" max="99" style="width: 60px;">
+            <!-- PRODUCT 1: Baphomet -->
+            <div class="item features-image col-12 col-md-6 col-lg-{{cardsWidth}}" style="margin-bottom: 30px;">
+                <div class="item-wrapper" mbr-style="{'background-color': cardsBg, 'border-radius': '8px', 'overflow': 'hidden', 'box-shadow': '0 2px 10px rgba(0,0,0,0.1)'}">
+                    <div class="item-img" style="height: 280px; overflow: hidden;">
+                        <img src="assets/images/product1.jpg" alt="Baphomet" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="item-content" style="padding: 20px;" mbr-if="showCardTitle || showCardSubtitle || showText || showButtons">
+                        <h5 class="item-title" style="font-weight: bold; margin-bottom: 10px; font-size: 1.25rem;" mbr-if="showCardTitle">
+                            <b>{prod1Name}</b>
+                        </h5>
+                        <h6 class="item-subtitle" style="color: #007bff; font-weight: bold; font-size: 1.5rem; margin-bottom: 12px;" mbr-if="showCardSubtitle">
+                            €{prod1Price}
+                        </h6>
+                        <p class="mbr-text" style="color: #666; margin-bottom: 15px; font-size: 0.95rem;" mbr-if="showText">
+                            Um amigo fofinho para abraçar, feito com fios macios e muito carinho.
+                        </p>
+                        <div class="mbr-section-btn item-footer" mbr-style="{'display': showButtons ? 'flex' : 'none', 'gap': '10px', 'align-items': 'center'}" mbr-if="showButtons">
+                            <input type="number" id="qty-baphomet" value="1" min="1" max="99" mbr-style="{'display': showQuantity ? 'block' : 'none', 'width': '60px', 'padding': '8px', 'border': '1px solid #ccc', 'border-radius': '4px', 'font-size': '14px', 'background': 'white'}" mbr-if="showQuantity">
+                            <a href="#" class="btn item-btn btn-primary"
+                               mbr-style="{'background-color': buttonColor, 'color': 'white', 'border': 'none', 'padding': '10px 16px', 'border-radius': '4px', 'flex': '1', 'text-align': 'center', 'text-decoration': 'none', 'font-weight': '600', 'cursor': 'pointer', 'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}"
+                               onclick="event.preventDefault(); const qtyInput1 = document.getElementById('qty-baphomet'); const quantity1 = qtyInput1 && qtyInput1.style.display !== 'none' ? qtyInput1.value : 1; const productName1 = this.closest('.item-content').querySelector('.item-title').textContent.trim(); const priceText = this.closest('.item-content').querySelector('.item-subtitle').textContent.trim(); const productPrice = priceText.replace('€', '').replace(',', '.'); window.witsecCart.addItem('{prod1Id}', productName1, parseFloat(productPrice), quantity1); return false;">
+                                Adicionar ao Carrinho
+                            </a>
                         </div>
-                        <button class="btn add-to-cart-btn w-100" 
-                                mbr-style="{'background-color': buttonColor, 'color': buttonTextColor, 'border': 'none', 'border-radius': borderRadius + 'px', 'padding': '10px'}"
-                                onclick="addProductToCart(this)"
-                                data-id="{prod1Id}"
-                                data-name="{prod1Name}"
-                                data-price="{prod1Price}">
-                            Add to Cart
-                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- PRODUCT 2 -->
-            <div class="col-12 col-md-4 mb-4">
-                <div class="card product-item" mbr-style="{'background-color': cardBg, 'border-radius': borderRadius + 'px', 'border': 'none'}">
-                    <img src="assets/images/product2.jpg" class="card-img-top" alt="Product 2" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title" mbr-if="showNames" mbr-editable="prod2Name">{prod2Name}</h5>
-                        <p class="card-text" mbr-style="{'color': priceColor, 'font-weight': 'bold', 'font-size': '18px'}">$29.99</p>
-                        <p class="card-text" mbr-if="showDescriptions" mbr-style="{'color': textColor}">Description</p>
-                        <div mbr-if="showQuantity" style="margin-bottom: 12px;">
-                            <input type="number" class="form-control product-qty" value="1" min="1" max="99" style="width: 60px;">
+            <!-- PRODUCT 2: Bailarina -->
+            <div class="item features-image col-12 col-md-6 col-lg-{{cardsWidth}}" style="margin-bottom: 30px;">
+                <div class="item-wrapper" mbr-style="{'background-color': cardsBg, 'border-radius': '8px', 'overflow': 'hidden', 'box-shadow': '0 2px 10px rgba(0,0,0,0.1)'}">
+                    <div class="item-img" style="height: 280px; overflow: hidden;">
+                        <img src="assets/images/product2.jpg" alt="Bailarina" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="item-content" style="padding: 20px;" mbr-if="showCardTitle || showCardSubtitle || showText || showButtons">
+                        <h5 class="item-title" style="font-weight: bold; margin-bottom: 10px; font-size: 1.25rem;" mbr-if="showCardTitle">
+                            <b>{prod2Name}</b>
+                        </h5>
+                        <h6 class="item-subtitle" style="color: #007bff; font-weight: bold; font-size: 1.5rem; margin-bottom: 12px;" mbr-if="showCardSubtitle">
+                            €{prod2Price}
+                        </h6>
+                        <p class="mbr-text" style="color: #666; margin-bottom: 15px; font-size: 0.95rem;" mbr-if="showText">
+                            Um amigo fofinho para abraçar, feito com fios macios e muito carinho.
+                        </p>
+                        <div class="mbr-section-btn item-footer" mbr-style="{'display': showButtons ? 'flex' : 'none', 'gap': '10px', 'align-items': 'center'}" mbr-if="showButtons">
+                            <input type="number" id="qty-bailarina" value="1" min="1" max="99" mbr-style="{'display': showQuantity ? 'block' : 'none', 'width': '70px', 'padding': '8px', 'border': '1px solid #ddd', 'border-radius': '4px'}" mbr-if="showQuantity">
+                            <a href="#" class="btn item-btn btn-primary"
+                               mbr-style="{'background-color': buttonColor, 'color': 'white', 'border': 'none', 'padding': '10px 20px', 'border-radius': '4px', 'flex': '1', 'text-align': 'center', 'text-decoration': 'none', 'font-weight': '600', 'cursor': 'pointer', 'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}"
+                               onclick="event.preventDefault(); const qtyInput2 = document.getElementById('qty-bailarina'); const quantity2 = qtyInput2 && qtyInput2.style.display !== 'none' ? qtyInput2.value : 1; const productName2 = this.closest('.item-content').querySelector('.item-title').textContent.trim(); const priceText2 = this.closest('.item-content').querySelector('.item-subtitle').textContent.trim(); const productPrice2 = priceText2.replace('€', '').replace(',', '.'); window.witsecCart.addItem('{prod2Id}', productName2, parseFloat(productPrice2), quantity2); return false;">
+                                Adicionar ao Carrinho
+                            </a>
                         </div>
-                        <button class="btn add-to-cart-btn w-100" 
-                                mbr-style="{'background-color': buttonColor, 'color': buttonTextColor, 'border': 'none', 'border-radius': borderRadius + 'px', 'padding': '10px'}"
-                                onclick="addProductToCart(this)"
-                                data-id="{prod2Id}"
-                                data-name="{prod2Name}"
-                                data-price="{prod2Price}">
-                            Add to Cart
-                        </button>
                     </div>
                 </div>
             </div>
 
-            <!-- PRODUCT 3 -->
-            <div class="col-12 col-md-4 mb-4">
-                <div class="card product-item" mbr-style="{'background-color': cardBg, 'border-radius': borderRadius + 'px', 'border': 'none'}">
-                    <img src="assets/images/product3.jpg" class="card-img-top" alt="Product 3" style="height: 200px; object-fit: cover;">
-                    <div class="card-body">
-                        <h5 class="card-title" mbr-if="showNames" mbr-editable="prod3Name">{prod3Name}</h5>
-                        <p class="card-text" mbr-style="{'color': priceColor, 'font-weight': 'bold', 'font-size': '18px'}">$39.99</p>
-                        <p class="card-text" mbr-if="showDescriptions" mbr-style="{'color': textColor}">Description</p>
-                        <div mbr-if="showQuantity" style="margin-bottom: 12px;">
-                            <input type="number" class="form-control product-qty" value="1" min="1" max="99" style="width: 60px;">
+            <!-- PRODUCT 3: Noginho -->
+            <div class="item features-image col-12 col-md-6 col-lg-{{cardsWidth}}" style="margin-bottom: 30px;">
+                <div class="item-wrapper" mbr-style="{'background-color': cardsBg, 'border-radius': '8px', 'overflow': 'hidden', 'box-shadow': '0 2px 10px rgba(0,0,0,0.1)'}">
+                    <div class="item-img" style="height: 280px; overflow: hidden;">
+                        <img src="assets/images/product3.jpg" alt="Noginho" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="item-content" style="padding: 20px;" mbr-if="showCardTitle || showCardSubtitle || showText || showButtons">
+                        <h5 class="item-title" style="font-weight: bold; margin-bottom: 10px; font-size: 1.25rem;" mbr-if="showCardTitle">
+                            <b>{prod3Name}</b>
+                        </h5>
+                        <h6 class="item-subtitle" style="color: #007bff; font-weight: bold; font-size: 1.5rem; margin-bottom: 12px;" mbr-if="showCardSubtitle">
+                            €{prod3Price}
+                        </h6>
+                        <p class="mbr-text" style="color: #666; margin-bottom: 15px; font-size: 0.95rem;" mbr-if="showText">
+                            Um amigo fofinho para abraçar, feito com fios macios e muito carinho.
+                        </p>
+                        <div class="mbr-section-btn item-footer" mbr-style="{'display': showButtons ? 'flex' : 'none', 'gap': '10px', 'align-items': 'center'}" mbr-if="showButtons">
+                            <input type="number" id="qty-noginho" value="1" min="1" max="99" mbr-style="{'display': showQuantity ? 'block' : 'none', 'width': '70px', 'padding': '8px', 'border': '1px solid #ddd', 'border-radius': '4px'}" mbr-if="showQuantity">
+                            <a href="#" class="btn item-btn btn-primary"
+                               mbr-style="{'background-color': buttonColor, 'color': 'white', 'border': 'none', 'padding': '10px 20px', 'border-radius': '4px', 'flex': '1', 'text-align': 'center', 'text-decoration': 'none', 'font-weight': '600', 'cursor': 'pointer', 'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}"
+                               onclick="event.preventDefault(); const qtyInput3 = document.getElementById('qty-noginho'); const quantity3 = qtyInput3 && qtyInput3.style.display !== 'none' ? qtyInput3.value : 1; const productName3 = this.closest('.item-content').querySelector('.item-title').textContent.trim(); const priceText3 = this.closest('.item-content').querySelector('.item-subtitle').textContent.trim(); const productPrice3 = priceText3.replace('€', '').replace(',', '.'); window.witsecCart.addItem('{prod3Id}', productName3, parseFloat(productPrice3), quantity3); return false;">
+                                Adicionar ao Carrinho
+                            </a>
                         </div>
-                        <button class="btn add-to-cart-btn w-100" 
-                                mbr-style="{'background-color': buttonColor, 'color': buttonTextColor, 'border': 'none', 'border-radius': borderRadius + 'px', 'padding': '10px'}"
-                                onclick="addProductToCart(this)"
-                                data-id="{prod3ID}"
-                                data-name="{prod3Name}"
-                                data-price="{prod3Price}">
-                            Add to Cart
-                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCT 4: Coelhinha Encantada -->
+            <div class="item features-image col-12 col-md-6 col-lg-{{cardsWidth}}" style="margin-bottom: 30px;">
+                <div class="item-wrapper" mbr-style="{'background-color': cardsBg, 'border-radius': '8px', 'overflow': 'hidden', 'box-shadow': '0 2px 10px rgba(0,0,0,0.1)'}">
+                    <div class="item-img" style="height: 280px; overflow: hidden;">
+                        <img src="assets/images/product4.jpg" alt="Coelhinha Encantada" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="item-content" style="padding: 20px;" mbr-if="showCardTitle || showCardSubtitle || showText || showButtons">
+                        <h5 class="item-title" style="font-weight: bold; margin-bottom: 10px; font-size: 1.25rem;" mbr-if="showCardTitle">
+                            <b>{prod4Name}</b>
+                        </h5>
+                        <h6 class="item-subtitle" style="color: #007bff; font-weight: bold; font-size: 1.5rem; margin-bottom: 12px;" mbr-if="showCardSubtitle">
+                            €{prod4Price}
+                        </h6>
+                        <p class="mbr-text" style="color: #666; margin-bottom: 15px; font-size: 0.95rem;" mbr-if="showText">
+                            Delicada e cheia de charme, perfeita para decorar e encantar.
+                        </p>
+                        <div class="mbr-section-btn item-footer" mbr-style="{'display': showButtons ? 'flex' : 'none', 'gap': '10px', 'align-items': 'center'}" mbr-if="showButtons">
+                            <input type="number" id="qty-coelhinha" value="1" min="1" max="99" mbr-style="{'display': showQuantity ? 'block' : 'none', 'width': '70px', 'padding': '8px', 'border': '1px solid #ddd', 'border-radius': '4px'}" mbr-if="showQuantity">
+                            <a href="#" class="btn item-btn btn-primary"
+                               mbr-style="{'background-color': buttonColor, 'color': 'white', 'border': 'none', 'padding': '10px 20px', 'border-radius': '4px', 'flex': '1', 'text-align': 'center', 'text-decoration': 'none', 'font-weight': '600', 'cursor': 'pointer', 'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}"
+                               onclick="event.preventDefault(); const qtyInput4 = document.getElementById('qty-coelhinha'); const quantity4 = qtyInput4 && qtyInput4.style.display !== 'none' ? qtyInput4.value : 1; const productName4 = this.closest('.item-content').querySelector('.item-title').textContent.trim(); const priceText4 = this.closest('.item-content').querySelector('.item-subtitle').textContent.trim(); const productPrice4 = priceText4.replace('€', '').replace(',', '.'); window.witsecCart.addItem('{prod4Id}', productName4, parseFloat(productPrice4), quantity4); return false;">
+                                Adicionar ao Carrinho
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCT 5: Leão Corajoso -->
+            <div class="item features-image col-12 col-md-6 col-lg-{{cardsWidth}}" style="margin-bottom: 30px;">
+                <div class="item-wrapper" mbr-style="{'background-color': cardsBg, 'border-radius': '8px', 'overflow': 'hidden', 'box-shadow': '0 2px 10px rgba(0,0,0,0.1)'}">
+                    <div class="item-img" style="height: 280px; overflow: hidden;">
+                        <img src="assets/images/product5.jpg" alt="Leão Corajoso" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="item-content" style="padding: 20px;" mbr-if="showCardTitle || showCardSubtitle || showText || showButtons">
+                        <h5 class="item-title" style="font-weight: bold; margin-bottom: 10px; font-size: 1.25rem;" mbr-if="showCardTitle">
+                            <b>Leão Corajoso</b>
+                        </h5>
+                        <h6 class="item-subtitle" style="color: #007bff; font-weight: bold; font-size: 1.5rem; margin-bottom: 12px;" mbr-if="showCardSubtitle">
+                            €34.99
+                        </h6>
+                        <p class="mbr-text" style="color: #666; margin-bottom: 15px; font-size: 0.95rem;" mbr-if="showText">
+                            Um companheiro de aventuras, tricotado com atenção a cada detalhe.
+                        </p>
+                        <div class="mbr-section-btn item-footer" mbr-style="{'display': showButtons ? 'flex' : 'none', 'gap': '10px', 'align-items': 'center'}" mbr-if="showButtons">
+                            <input type="number" id="qty-leao" value="1" min="1" max="99" mbr-style="{'display': showQuantity ? 'block' : 'none', 'width': '70px', 'padding': '8px', 'border': '1px solid #ddd', 'border-radius': '4px'}" mbr-if="showQuantity">
+                            <a href="#" class="btn item-btn btn-primary"
+                               mbr-style="{'background-color': buttonColor, 'color': 'white', 'border': 'none', 'padding': '10px 20px', 'border-radius': '4px', 'flex': '1', 'text-align': 'center', 'text-decoration': 'none', 'font-weight': '600', 'cursor': 'pointer', 'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}"
+                               data-price="34.99"
+                               onclick="event.preventDefault(); const qtyInput5 = document.getElementById('qty-leao'); const quantity5 = qtyInput5 && qtyInput5.style.display !== 'none' ? qtyInput5.value : 1; window.witsecCart.addItem('leao', 'Leão Corajoso', parseFloat(this.getAttribute('data-price')), quantity5); return false;">
+                                Adicionar ao Carrinho
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PRODUCT 6: Baleia Serena -->
+            <div class="item features-image col-12 col-md-6 col-lg-{{cardsWidth}}" style="margin-bottom: 30px;">
+                <div class="item-wrapper" mbr-style="{'background-color': cardsBg, 'border-radius': '8px', 'overflow': 'hidden', 'box-shadow': '0 2px 10px rgba(0,0,0,0.1)'}">
+                    <div class="item-img" style="height: 280px; overflow: hidden;">
+                        <img src="assets/images/product6.jpg" alt="Baleia Serena" style="width: 100%; height: 100%; object-fit: cover;">
+                    </div>
+                    <div class="item-content" style="padding: 20px;" mbr-if="showCardTitle || showCardSubtitle || showText || showButtons">
+                        <h5 class="item-title" style="font-weight: bold; margin-bottom: 10px; font-size: 1.25rem;" mbr-if="showCardTitle">
+                            <b>Baleia Serena</b>
+                        </h5>
+                        <h6 class="item-subtitle" style="color: #007bff; font-weight: bold; font-size: 1.5rem; margin-bottom: 12px;" mbr-if="showCardSubtitle">
+                            €29.99
+                        </h6>
+                        <p class="mbr-text" style="color: #666; margin-bottom: 15px; font-size: 0.95rem;" mbr-if="showText">
+                            Traz a calma do oceano para o quarto, um toque de serenidade artesanal.
+                        </p>
+                        <div class="mbr-section-btn item-footer" mbr-style="{'display': showButtons ? 'flex' : 'none', 'gap': '10px', 'align-items': 'center'}" mbr-if="showButtons">
+                            <input type="number" id="qty-baleia" value="1" min="1" max="99" mbr-style="{'display': showQuantity ? 'block' : 'none', 'width': '70px', 'padding': '8px', 'border': '1px solid #ddd', 'border-radius': '4px'}" mbr-if="showQuantity">
+                            <a href="#" class="btn item-btn btn-primary"
+                               mbr-style="{'background-color': buttonColor, 'color': 'white', 'border': 'none', 'padding': '10px 20px', 'border-radius': '4px', 'flex': '1', 'text-align': 'center', 'text-decoration': 'none', 'font-weight': '600', 'cursor': 'pointer', 'display': 'flex', 'align-items': 'center', 'justify-content': 'center'}"
+                               data-price="29.99"
+                               onclick="event.preventDefault(); const qtyInput6 = document.getElementById('qty-baleia'); const quantity6 = qtyInput6 && qtyInput6.style.display !== 'none' ? qtyInput6.value : 1; window.witsecCart.addItem('baleia', 'Baleia Serena', parseFloat(this.getAttribute('data-price')), quantity6); return false;">
+                                Adicionar ao Carrinho
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+        </div>
     </div>
-
-<script>
-    // Cart management
-    let witsecCart = JSON.parse(localStorage.getItem('witsecShoppingCart')) || [];
-
-    function saveCart() {
-        localStorage.setItem('witsecShoppingCart', JSON.stringify(witsecCart));
-    }
-
-    window.addToCart = function(product) {
-        if (!product.id || !product.name || !product.price) {
-            console.error('Invalid product:', product);
-            return;
-        }
-
-        const qty = Math.max(1, parseInt(product.quantity) || 1);
-        const existing = witsecCart.findIndex(item => item.id === product.id);
-
-        if (existing > -1) {
-            witsecCart[existing].quantity += qty;
-        } else {
-            witsecCart.push({
-                id: product.id,
-                name: product.name,
-                price: parseFloat(product.price),
-                quantity: qty
-            });
-        }
-        saveCart();
-        console.log('Item added to cart:', product);
-        alert('Added to cart!');
-    };
-
-    function addProductToCart(btn) {
-        const qty = btn.closest('.card-body').querySelector('.product-qty');
-        const quantity = qty ? parseInt(qty.value) : 1;
-        
-        window.addToCart({
-            id: btn.dataset.id,
-            name: btn.dataset.name,
-            price: btn.dataset.price,
-            quantity: quantity
-        });
-    }
-</script>
 </section>

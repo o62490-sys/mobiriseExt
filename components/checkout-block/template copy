@@ -1,0 +1,159 @@
+<section class="checkout-block" group="Forms">
+    <mbr-parameters>
+        <header>PayPal Settings</header>
+        <input type="text" title="PayPal Client ID" name="paypalClientId" value="YOUR_PAYPAL_CLIENT_ID">
+        <input type="select" title="Currency" name="currency">
+            <option value="USD" selected>EUR (€)</option>
+            <option value="EUR">USD ($)</option>
+            <option value="GBP">GBP (£)</option>
+            <option value="CAD">CAD (C$)</option>
+            <option value="AUD">AUD (A$)</option>
+        </input>
+        <input type="text" title="Order Email" name="orderEmail" value="your_email@example.com">
+
+        <header>Button Settings</header>
+        <input type="text" title="Button Text" name="proceedButtonText" value="Proceed to Payment">
+        <input type="color" title="Button Color" name="proceedButtonBgColor" value="#007bff">
+        <input type="color" title="Button Text Color" name="proceedButtonTextColor" value="#ffffff">
+
+        <header>Form Settings</header>
+        <input type="checkbox" title="Show Cart Summary" name="showCartSummary" checked>
+        <input type="checkbox" title="Show Customer Form" name="showCustomerForm" checked>
+        <input type="checkbox" title="Require Terms" name="requireTerms">
+
+        <header>Colors</header>
+        <input type="color" title="Background Color" name="bgColor" value="#f8f9fa">
+        <input type="color" title="Card Background" name="cardBgColor" value="#ffffff">
+        <input type="color" title="Text Color" name="textColor" value="#212529">
+    </mbr-parameters>
+
+    <div class="container" mbr-style="{'background-color': bgColor, 'padding': '40px 0'}">
+        <h2 class="mbr-section-title mbr-fonts-style display-2" mbr-style="{'color': textColor}">
+            <strong>Checkout</strong>
+        </h2>
+
+        <div class="row">
+            <!-- Customer Info Form -->
+            <div class="col-md-6" mbr-if="showCustomerForm">
+                <div class="card" mbr-style="{'background-color': cardBgColor, 'padding': '20px'}">
+                    <h3 class="mbr-fonts-style display-5" mbr-style="{'color': textColor}">Your Information</h3>
+
+                    <form id="checkout-form">
+                        <div class="form-group">
+                            <label for="name" mbr-style="{'color': textColor}">Name *</label>
+                            <input type="text" class="form-control" id="name" name="name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" mbr-style="{'color': textColor}">Email *</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address" mbr-style="{'color': textColor}">Address *</label>
+                            <input type="text" class="form-control" id="address" name="address" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="city" mbr-style="{'color': textColor}">City *</label>
+                            <input type="text" class="form-control" id="city" name="city" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="zip" mbr-style="{'color': textColor}">Zip Code *</label>
+                            <input type="text" class="form-control" id="zip" name="zip" required>
+                        </div>
+
+                        <div mbr-if="requireTerms" class="form-group">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="terms" required>
+                                <label class="form-check-label" for="terms" mbr-style="{'color': textColor}">
+                                    I accept the terms and conditions
+                                </label>
+                            </div>
+                        </div>
+
+                        <button type="button" id="proceed-to-payment" class="btn btn-block"
+                                mbr-style="{'background-color': proceedButtonBgColor, 'color': proceedButtonTextColor, 'border': 'none', 'padding': '12px', 'border-radius': '6px', 'font-weight': '500', 'width': '100%'}">
+                            Proceed to Payment
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="col-md-6" mbr-if="showCartSummary">
+                <div class="card" mbr-style="{'background-color': cardBgColor, 'padding': '20px'}">
+                    <h3 class="mbr-fonts-style display-5" mbr-style="{'color': textColor}">Order Summary</h3>
+
+                    <div id="cart-summary" style="min-height: 100px; margin-bottom: 20px;">
+                        <p mbr-style="{'color': textColor}">Your cart is empty</p>
+                    </div>
+
+                    <h4 mbr-style="{'color': textColor}">
+                        Total: <span id="cart-total">$0.00</span>
+                    </h4>
+
+                    <div id="paypal-button-container" style="margin-top: 20px; min-height: 50px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        function displayCartItems() {
+            const cart = JSON.parse(localStorage.getItem('witsecShoppingCart')) || [];
+            const cartSummary = document.getElementById('cart-summary');
+            const cartTotal = document.getElementById('cart-total');
+            if (cart.length === 0) {
+                cartSummary.innerHTML = '<p>Your cart is empty</p>';
+                cartTotal.textContent = '\u00240.00'; // $0.00
+                return;
+            }
+            let html = '';
+            let total = 0;
+            cart.forEach(item => {
+                const price = parseFloat(item.price) || 0;
+                const itemTotal = price * item.quantity;
+                total += itemTotal;
+                html += '<div style="display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #eee;">' +
+                            '<div>' +
+                                '<strong>' + item.name + '</strong><br>' +
+                                '\u0024' + price.toFixed(2) + ' × ' + item.quantity +
+                            '</div>' +
+                            '<div>\u0024' + itemTotal.toFixed(2) + '</div>' +
+                        '</div>';
+            });
+            cartSummary.innerHTML = html;
+            cartTotal.textContent = '\u0024' + total.toFixed(2);
+        }
+        document.addEventListener('DOMContentLoaded', displayCartItems);
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const proceedBtn = document.getElementById('proceed-to-payment');
+            if (proceedBtn) {
+                proceedBtn.addEventListener('click', function() {
+                    const form = document.getElementById('checkout-form');
+                    const requiredFields = form.querySelectorAll('[required]');
+                    let isValid = true;
+
+                    requiredFields.forEach(field => {
+                        if (!field.value.trim()) {
+                            field.style.borderColor = '#dc3545';
+                            isValid = false;
+                        } else {
+                            field.style.borderColor = '';
+                        }
+                    });
+
+                    if (isValid) {
+                        alert('Form valid! Ready for payment.');
+                    } else {
+                        alert('Please fill in all required fields.');
+                    }
+                });
+            }
+        });
+    </script>
+</section>

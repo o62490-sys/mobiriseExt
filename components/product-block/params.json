@@ -1,15 +1,17 @@
 {
-    "name": "Product Block",
-    "alias": "witsec-product-block",
-    "type": "block",
-    "version": 1.0,
-    "minAppVersion": "4.7.7",
-    "category": "witsec",
-    "description": "Display products with add to cart functionality",
-    "thumbnail": "thumb.jpg",
-    "preview": "template.html",
-    "dependencies": [
-        "../../static/cart.js",
-        "../../css/style.css"
-    ]
+  "name": "Shopping Cart",
+  "alias": "witsec-shopping-cart",
+  "version": 1.0,
+  "minAppVersion": "4.7.7",
+  "components": [
+    {
+      "path": "components/product-block",
+      "_group": "witsec"
+    },
+    {
+      "path": "components/checkout-block",
+      "_group": "witsec"
+    }
+  ],
+  "dependencies": ["css/style.css"]
 }
